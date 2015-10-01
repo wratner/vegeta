@@ -29,6 +29,8 @@ func attackCmd() command {
 	fs.StringVar(&opts.outputf, "output", "stdout", "Output file")
 	fs.StringVar(&opts.bodyf, "body", "", "Requests body file")
 	fs.StringVar(&opts.certf, "cert", "", "x509 Certificate file")
+	fs.StringVar(&opts.clientCert, "clientCert", "", "SSL Client Certificate file")
+	fs.StringVar(&opts.clientKey, "clientKey", "", "SSL Client Key file")
 	fs.BoolVar(&opts.lazy, "lazy", false, "Read targets lazily")
 	fs.DurationVar(&opts.duration, "duration", 10*time.Second, "Duration of the test")
 	fs.DurationVar(&opts.timeout, "timeout", vegeta.DefaultTimeout, "Requests timeout")
@@ -58,6 +60,8 @@ type attackOpts struct {
 	outputf     string
 	bodyf       string
 	certf       string
+	clientCert  string
+	clientKey   string
 	lazy        bool
 	duration    time.Duration
 	timeout     time.Duration
@@ -129,6 +133,14 @@ func attack(opts *attackOpts) (err error) {
 		if tlsc.RootCAs, err = certPool(cert); err != nil {
 			return err
 		}
+	}
+
+	if opts.clientCert != "" && opts.clientKey != "" {
+		ssLcert, err := tls.LoadX509KeyPair(opts.clientCert, opts.clientKey)
+		if err != nil {
+			return err
+		}
+		tlsc.Certificates = []tls.Certificate{ssLcert}
 	}
 
 	atk := vegeta.NewAttacker(
