@@ -35,6 +35,8 @@ global flags:
 
 attack command:
   -body="": Requests body file
+  -clientCert="": Client Certificate file
+  -clientKey="": Client Certificate Key
   -cert="": x509 Certificate file
   -connections=10000: Max open idle connections per target host
   -duration=10s: Duration of the test
